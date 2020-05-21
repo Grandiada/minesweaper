@@ -1,0 +1,27 @@
+{
+  "name": "minesweaper",
+  "version": "1.0.0",
+  "description": "Test task",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Grandiada/minesweaper.git"
+  },
+  "author": "Pavel Shchepko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Grandiada/minesweaper/issues"
+  },
+  "homepage": "https://github.com/Grandiada/minesweaper#readme",
+  "devDependencies": {
+    "@types/react": "^16.9.35",
+    "react": "^16.13.1"
+  },
+  "dependencies": {
+    "@types/react-dom": "^16.9.8",
+    "react-dom": "^16.13.1"
+  }
+}
