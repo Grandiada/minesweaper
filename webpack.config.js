@@ -84,7 +84,10 @@ module.exports = (env, options) => {
         chunkFilename: devMode ? '[name].css' : '[name].[hash].css',
       }),
       new ForkTsCheckerWebpackPlugin({
-        useTypescriptIncrementalApi: true
+        useTypescriptIncrementalApi: true,
+        tsconfig: 'tsconfig.json',
+        watch: 'src',
+        async: false
       }),
     ]
   }
