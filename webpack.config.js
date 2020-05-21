@@ -42,6 +42,16 @@ module.exports = (env, options) => {
         },
         {
           test: /\.(sa|sc|c)ss$/,
+          include: [/node_modules/],
+          use: [
+            'style-loader',
+            'css-loader',
+            'sass-loader',
+          ],
+        },
+        {
+          test: /\.(sa|sc|c)ss$/,
+          include: /src/,
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
