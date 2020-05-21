@@ -22,7 +22,8 @@
   "homepage": "https://github.com/Grandiada/minesweaper#readme",
   "devDependencies": {
     "@types/react": "^16.9.35",
-    "react": "^16.13.1"
+    "react": "^16.13.1",
+    "typescript-plugin-css-modules": "^2.3.0"
   },
   "dependencies": {
     "@ant-design/icons": "^4.1.0",

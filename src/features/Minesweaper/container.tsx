@@ -1,4 +1,5 @@
 import * as React from 'react';
+import FieldCell from './components/FieldCell/FieldCell';
 
 export interface IMinesweaperProps {
 }
@@ -18,6 +19,7 @@ export default class Minesweaper extends React.Component<IMinesweaperProps, IMin
         return (
             <div>
                 Hello
+                <FieldCell></FieldCell>
             </div>
         );
     }
