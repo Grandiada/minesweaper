@@ -1,6 +1,6 @@
 import {
     MinesweaperActionTypes,
-    GET_MAP, SET_MAP, NEW_GAME, SET_LEVELS, OPEN_CELL, GET_HELP
+    GET_MAP, SET_MAP, NEW_GAME, SET_LEVELS, OPEN_CELL, GET_HELP, SOLVE_GAME
 } from "./types";
 
 export const GetMapAction =
@@ -41,5 +41,11 @@ export const OpenCellAction =
         ({
             type: OPEN_CELL,
             payload: { x, y }
+        });
+
+export const SolveGameAction =
+    (): MinesweaperActionTypes =>
+        ({
+            type: SOLVE_GAME,
         });
 

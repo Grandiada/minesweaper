@@ -1,9 +1,11 @@
 import { all, put, select, takeLatest } from "@redux-saga/core/effects";
-import { NEW_GAME, INewGameActionType, OPEN_CELL, IOpenCellActionType } from "./types";
+import { NEW_GAME, INewGameActionType, OPEN_CELL, IOpenCellActionType, SOLVE_GAME } from "./types";
 import { SocketActionTypes } from "../../../common/utils/socketMiddleware/SocketActionTypes";
 import { SendMessageToSocketAction } from "../../../common/utils/socketMiddleware/actions";
 import { arrayParser } from "./utils/arrayParser";
 import { SetMapAction, NewGameAction } from "./actions";
+import { IApplicationState } from "../../../app/store";
+import { constructGroupds } from "./utils/groupConstuctor";
 
 function* OnSocketMessage(action: { type: SocketActionTypes.WS_MESSAGE, value: string }) {
     try {
@@ -17,12 +19,20 @@ function* OnSocketMessage(action: { type: SocketActionTypes.WS_MESSAGE, value: s
         switch (command) {
             case 'map': {
                 yield put(SetMapAction(arrayParser(value)))
+                const state = (yield select()) as IApplicationState;
+                console.clear();
+
+                if (state.minesweaper.playerField)
+                    console.log(constructGroupds(state.minesweaper.playerField).safePoints)
                 break;
             }
             case 'open': {
                 if (value.indexOf('lose') !== -1) {
                     yield put(NewGameAction(1));
                     alert('You lose');
+                } else if (value.indexOf('OK') === -1) {
+                    console.log(value);
+                    alert('Win?');
                 }
             }
             default:
@@ -61,11 +71,23 @@ function* OnInitGame() {
     }
 }
 
+function* OnSolveGame() {
+    try {
+        const state = (yield select()) as IApplicationState;
+        yield put(SendMessageToSocketAction(`help`));
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
+
 export default function* rootMinesweaperSaga() {
     yield all([
         takeLatest(SocketActionTypes.WS_MESSAGE, OnSocketMessage),
         takeLatest(NEW_GAME, OnNewGame),
         takeLatest(OPEN_CELL, OnOpenCell),
+        takeLatest(SOLVE_GAME, OnSolveGame),
         OnInitGame()
     ]);
 }

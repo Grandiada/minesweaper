@@ -2,6 +2,8 @@ import { Action } from "redux";
 
 export const NEW_GAME = "@@minesweaper/NEW_GAME";
 
+export const SOLVE_GAME = "@@minesweaper/SOLVE_GAME";
+
 export const GET_HELP = "@@minesweaper/GET_HELP";
 export const SET_LEVELS = "@@minesweaper/SET_LEVELS";
 
@@ -13,6 +15,9 @@ export const SET_MAP = "@@minesweaper/SET_MAP";
 export interface IMinesweaperState {
     playerField?: (number | null)[][];
     levels: number[];
+}
+
+export interface ISolveGameActionType extends Action<typeof SOLVE_GAME> {
 }
 
 export interface ISetLevelsActionType extends Action<typeof SET_LEVELS> {
@@ -48,4 +53,4 @@ export interface IOpenCellActionType extends Action<typeof OPEN_CELL> {
 
 
 export type MinesweaperActionTypes = ISetLevelsActionType | IGetHelpActionType | INewGameActionType |
-    IGetMapActionType | ISetMapActionType | IOpenCellActionType
+    IGetMapActionType | ISetMapActionType | IOpenCellActionType | ISolveGameActionType;

@@ -13,6 +13,7 @@ interface IMinesweaperData {
 interface IMinesweaperActions {
     newGame: typeof minesweaperActions.NewGameAction;
     openCell: typeof minesweaperActions.OpenCellAction;
+    solveGame: typeof minesweaperActions.SolveGameAction;
 }
 
 type IMinesweaperProps = IMinesweaperData & IMinesweaperActions;
@@ -44,6 +45,13 @@ class Minesweaper extends React.PureComponent<IMinesweaperProps, {}> {
                         )
                     })
                 }
+                <div>
+                    <Button
+                        type={"ghost"}
+                        onClick={() => {
+                            this.props.solveGame()
+                        }}>Solve Game</Button>
+                </div>
             </div>
         );
     }
@@ -58,7 +66,8 @@ const mapStateToProps = (state: IApplicationState): IMinesweaperData => {
 
 const mapDispatchToProps: IMinesweaperActions = {
     newGame: minesweaperActions.NewGameAction,
-    openCell: minesweaperActions.OpenCellAction
+    openCell: minesweaperActions.OpenCellAction,
+    solveGame: minesweaperActions.SolveGameAction,
 };
 
 export default
