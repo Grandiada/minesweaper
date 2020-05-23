@@ -1,0 +1,26 @@
+.field-cell-base {
+    color: white;
+    text-align: center;
+    width: 30px;
+    height: 30px;
+    background-color: rgb(135, 206, 235);
+    cursor: pointer;
+    display: inline-block;
+    line-height: 200%;
+    border: 1px solid wheat;
+}
+
+.field-cell_active {
+    &:hover {
+        background-color: rgba(135, 206, 235, 0.7);
+    }
+
+    &:active {
+        background-color: rgba(135, 206, 235, 1);
+    }
+}
+
+.field-cell_disabled {
+    background-color: rgb(64, 108, 126);
+    cursor: default;
+}

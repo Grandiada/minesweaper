@@ -11,6 +11,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 import Router, { history } from './routes';
 import { reducers } from './store';
+import { socketMiddleware } from "../common/utils/socketMiddleware/socketMiddleware";
 
 import rootSaga from './sagas';
 
@@ -18,7 +19,7 @@ import 'antd/dist/antd.css';
 
 const sagaMiddleware = createSagaMiddleware();
 
-const middlewares: Middleware[] = [sagaMiddleware, routerMiddleware(history)];
+const middlewares: Middleware[] = [socketMiddleware('wss://hometask.eg1236.com/game1/'), sagaMiddleware, routerMiddleware(history)];
 
 if (process.env.NODE_ENV === 'development')
   middlewares.push(logger);

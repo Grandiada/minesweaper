@@ -52,9 +52,10 @@
     "sass-loader": "^8.0.0",
     "style-loader": "^1.2.1",
     "ts-loader": "^7.0.0",
-    "tslint": "^6.0.0",
+    "tslint": "^6.1.2",
     "typescript": "^3.8.3",
     "typescript-plugin-css-modules": "^2.3.0",
+    "typesocket": "^1.0.0",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.10.3"

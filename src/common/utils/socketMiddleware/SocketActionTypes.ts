@@ -1,0 +1,6 @@
+export enum SocketActionTypes {
+    WS_CONNECTED = 'WS_CONNECTED',
+    WS_DISCONNECTED = 'WS_DISCONNECTED',
+    WS_MESSAGE = 'WS_MESSAGE',
+    WS_SEND_MESSAGE = 'WS_SEND_MESSAGE'
+}
