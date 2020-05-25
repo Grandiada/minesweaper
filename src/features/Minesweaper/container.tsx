@@ -29,29 +29,29 @@ class Minesweaper extends React.PureComponent<IMinesweaperProps, {}> {
     public render() {
         return (
             <div>
-                {this.props.playerField && <PlayerField
-                    field={this.props.playerField}
-                    openCell={this.props.openCell}
-                />}
-                {
-                    [1, 2, 3, 4].map((i) => {
-                        return (
-                            <Button
-                                type={"primary"}
-                                key={i}
-                                onClick={() => {
-                                    this.props.newGame(i)
-                                }}>{i}</Button>
-                        )
-                    })
-                }
                 <div>
+                    {
+                        [1, 2, 3, 4].map((i) => {
+                            return (
+                                <Button
+                                    type={"primary"}
+                                    key={i}
+                                    onClick={() => {
+                                        this.props.newGame(i)
+                                    }}>{i}</Button>
+                            )
+                        })
+                    }
                     <Button
                         type={"ghost"}
                         onClick={() => {
                             this.props.solveGame()
                         }}>Solve Game</Button>
                 </div>
+                {this.props.playerField && <PlayerField
+                    field={this.props.playerField}
+                    openCell={this.props.openCell}
+                />}
             </div>
         );
     }

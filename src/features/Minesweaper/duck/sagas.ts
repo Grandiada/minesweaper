@@ -18,27 +18,27 @@ function* OnSocketMessage(action: { type: SocketActionTypes.WS_MESSAGE, value: s
                 const map = arrayParser(value);
                 yield put(SetMapAction(map))
                 // const state = (yield select()) as IApplicationState;
-                if (!isGameOver) {
-                    const groups = constructGroupds(map)
-                    console.log(groups);
-                    if (groups.safePoints.length > 0) {
-                        console.log(`safe move ${groups.safePoints[0].x} ${groups.safePoints[0].y}`)
-                        yield put(OpenCellAction(groups.safePoints[0].x, groups.safePoints[0].y));
-                    }
-                    else if (groups.safePoints.length === 0 && groups.riskyPoints.length > 0) {
-                        const minChanceToLose = groups.riskyPoints.reduce((p, v) => {
-                            return (p.chance < v.chance ? p : v);
-                        });
+                // if (!isGameOver) {
+                //     const groups = constructGroupds(map)
+                //     console.log(groups);
+                //     if (groups.safePoints.length > 0) {
+                //         console.log(`safe move ${groups.safePoints[0].x} ${groups.safePoints[0].y}`)
+                //         yield put(OpenCellAction(groups.safePoints[0].x, groups.safePoints[0].y));
+                //     }
+                //     else if (groups.safePoints.length === 0 && groups.riskyPoints.length > 0) {
+                //         const minChanceToLose = groups.riskyPoints.reduce((p, v) => {
+                //             return (p.chance < v.chance ? p : v);
+                //         });
                         
-                        console.log(`risky move ${minChanceToLose.x} ${minChanceToLose.y}`)
-                        yield put(OpenCellAction(minChanceToLose.x, minChanceToLose.y));
-                    } else if (groups.minedPoints.length === 0 && groups.riskyPoints.length === 0 && groups.safePoints.length === 0) {
-                        yield put(OpenCellAction(10, 10));
-                    }
-                    else {
-                        console.log('no movies')
-                    }
-                }
+                //         console.log(`risky move ${minChanceToLose.x} ${minChanceToLose.y}`)
+                //         yield put(OpenCellAction(minChanceToLose.x, minChanceToLose.y));
+                //     } else if (groups.minedPoints.length === 0 && groups.riskyPoints.length === 0 && groups.safePoints.length === 0) {
+                //         yield put(OpenCellAction(10, 10));
+                //     }
+                //     else {
+                //         console.log('no movies')
+                //     }
+                // }
                 break;
             }
             case 'open': {

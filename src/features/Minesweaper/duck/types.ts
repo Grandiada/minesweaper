@@ -15,6 +15,9 @@ export const SET_MAP = "@@minesweaper/SET_MAP";
 export interface IMinesweaperState {
     playerField?: (number | null)[][];
     levels: number[];
+
+    gameEnded: boolean;
+    isAutoSolveMode: boolean;
 }
 
 export interface ISolveGameActionType extends Action<typeof SOLVE_GAME> {

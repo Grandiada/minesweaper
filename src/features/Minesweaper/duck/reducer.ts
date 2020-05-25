@@ -5,7 +5,9 @@ import {
 
 const initialState: IMinesweaperState = {
     levels: [],
-    playerField: undefined
+    playerField: undefined,
+    gameEnded: false,
+    isAutoSolveMode: false
 };
 
 const MinesweaperReducer: Reducer<IMinesweaperState, MinesweaperActionTypes> =
