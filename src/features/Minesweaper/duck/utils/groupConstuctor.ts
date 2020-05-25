@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 interface IPoint {
     x: number;
     y: number;
@@ -79,7 +81,7 @@ export const categorizeCells = (field: (number | null)[][]): ICategorizedCells =
                     const overlap = getGroupOverlap(parent.group, child.group);
                     const newGroup: IGroupDescription = {
                         group: overlap,
-                        mines: parent.mines - child.group.length - overlap.length,
+                        mines: parent.mines - (child.group.length - overlap.length),
                     }
                     if (newGroup.mines !== child.mines) {
                         break;
@@ -114,15 +116,19 @@ export const categorizeCells = (field: (number | null)[][]): ICategorizedCells =
 }
 
 export const setCellChances = (groups: IGroupDescription[]) => {
-    const map = new Map<string, number>();
+    const map = new Map<string, BigNumber>();
 
     for (const group of groups) {
         for (const cell of group.group) {
             const value = map.get(pointToString(cell))
             if (value === undefined) {// если ячейка еще не в мапе
-                map.set(pointToString(cell), group.mines / group.group.length); // то добавляем ее со значением из группы
+                const cellChance = new BigNumber(group.mines).div(group.group.length);
+                map.set(pointToString(cell), cellChance); // то добавляем ее со значением из группы
             } else { //если она уже в мапе, то корректируем ее значение по теории вероятности
-                map.set(pointToString(cell), 1 - (1 - value) * (1 - group.mines / group.group.length));
+                const cellChance = new BigNumber(1).minus(
+                    new BigNumber(1).minus(value).multipliedBy(new BigNumber(1).minus(new BigNumber(group.mines).dividedBy(group.group.length)))
+                )
+                map.set(pointToString(cell), cellChance);
             }
         }
     }
@@ -133,23 +139,23 @@ export const setCellChances = (groups: IGroupDescription[]) => {
 
             const sum = group.group.reduce((accumulator, currentValue) => {
                 const value = map.get(pointToString(currentValue));
-                if (value || value === 0)
-                    return accumulator + value;
+                if (value)
+                    return accumulator.plus(value);
                 else
                     throw new Error();
-            }, 0)
+            }, new BigNumber(0))
 
             const mines = group.mines;
-            if (Math.abs(sum - mines) > 1) {
+            if (sum.minus(mines).abs().isGreaterThan(0.1)) {
                 repeat = true;
 
-                const coef = group.mines / sum;
+                const coef = new BigNumber(group.mines).dividedBy(sum);
 
                 //correct
                 for (const cell of group.group) {
                     const value = map.get(pointToString(cell));
-                    if (value || value === 0)
-                        map.set(pointToString(cell), value * coef);
+                    if (value)
+                        map.set(pointToString(cell), value.multipliedBy(coef));
                     else
                         throw new Error();
                 }
@@ -162,10 +168,10 @@ export const setCellChances = (groups: IGroupDescription[]) => {
     for (const group of groups) {
         for (const cell of group.group) {
             let value = map.get(pointToString(cell));
-            if (value || value === 0) {
-                if (value > 0.99) value = 0.99;
-                if (value < 0) value = 0;
-                cell.chance = value;
+            if (value) {
+                if (value.isGreaterThan(0.99)) value = new BigNumber(0.99);
+                if (value?.isLessThan(0)) value = new BigNumber(0);
+                cell.chance = value.decimalPlaces(2, BigNumber.ROUND_HALF_UP).toNumber();
             } else
                 throw new Error();
 
