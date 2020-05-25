@@ -21,8 +21,8 @@ const sagaMiddleware = createSagaMiddleware();
 
 const middlewares: Middleware[] = [socketMiddleware('wss://hometask.eg1236.com/game1/'), sagaMiddleware, routerMiddleware(history)];
 
-if (process.env.NODE_ENV === 'development')
-  middlewares.push(logger);
+// if (process.env.NODE_ENV === 'development')
+//   middlewares.push(logger);
 
 const store = createStore(reducers(history), composeWithDevTools(applyMiddleware(...middlewares)));
 sagaMiddleware.run(rootSaga);

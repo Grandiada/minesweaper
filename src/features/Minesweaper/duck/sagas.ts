@@ -3,39 +3,62 @@ import { NEW_GAME, INewGameActionType, OPEN_CELL, IOpenCellActionType, SOLVE_GAM
 import { SocketActionTypes } from "../../../common/utils/socketMiddleware/SocketActionTypes";
 import { SendMessageToSocketAction } from "../../../common/utils/socketMiddleware/actions";
 import { arrayParser } from "./utils/arrayParser";
-import { SetMapAction, NewGameAction } from "./actions";
+import { SetMapAction, NewGameAction, OpenCellAction } from "./actions";
 import { IApplicationState } from "../../../app/store";
 import { constructGroupds } from "./utils/groupConstuctor";
 
+let isGameOver = false;
 function* OnSocketMessage(action: { type: SocketActionTypes.WS_MESSAGE, value: string }) {
     try {
-        console.log(action)
-        // {type: "WS_MESSAGE", value: "new: OK"}
-        // {type: "WS_MESSAGE", value: "map:↵□□□□□□□□□□↵□□□□□□□□□□↵□□□□□□□□□□↵□□□□□□□□□□↵□…□□□□↵□□□□□□□□□□↵□□□□□□□□□□↵□□□□□□□□□□↵□□□□□□□□□□↵"}
         const parsedResponse = action.value.split(':')
         const command = parsedResponse[0];
         const value = parsedResponse[1];
-
         switch (command) {
             case 'map': {
-                yield put(SetMapAction(arrayParser(value)))
-                const state = (yield select()) as IApplicationState;
-                console.clear();
-
-                if (state.minesweaper.playerField)
-                    console.log(constructGroupds(state.minesweaper.playerField).safePoints)
+                const map = arrayParser(value);
+                yield put(SetMapAction(map))
+                // const state = (yield select()) as IApplicationState;
+                if (!isGameOver) {
+                    const groups = constructGroupds(map)
+                    console.log(groups);
+                    if (groups.safePoints.length > 0) {
+                        console.log(`safe move ${groups.safePoints[0].x} ${groups.safePoints[0].y}`)
+                        yield put(OpenCellAction(groups.safePoints[0].x, groups.safePoints[0].y));
+                    }
+                    else if (groups.safePoints.length === 0 && groups.riskyPoints.length > 0) {
+                        const minChanceToLose = groups.riskyPoints.reduce((p, v) => {
+                            return (p.chance < v.chance ? p : v);
+                        });
+                        
+                        console.log(`risky move ${minChanceToLose.x} ${minChanceToLose.y}`)
+                        yield put(OpenCellAction(minChanceToLose.x, minChanceToLose.y));
+                    } else if (groups.minedPoints.length === 0 && groups.riskyPoints.length === 0 && groups.safePoints.length === 0) {
+                        yield put(OpenCellAction(10, 10));
+                    }
+                    else {
+                        console.log('no movies')
+                    }
+                }
                 break;
             }
             case 'open': {
                 if (value.indexOf('lose') !== -1) {
-                    yield put(NewGameAction(1));
-                    alert('You lose');
-                } else if (value.indexOf('OK') === -1) {
+                    isGameOver = true;
+                    // debugger;
+                    yield put(NewGameAction(2));
+                } else if (value.indexOf('OK') === -1)
                     console.log(value);
-                    alert('Win?');
+
+                if (value.indexOf('win') !== -1) {
+                    isGameOver = true;
+                    alert('WIN');
                 }
+                console.log(action.value);
+                break;
             }
             default:
+                console.log(action.value);
+
                 break;
         }
 
@@ -47,6 +70,7 @@ function* OnSocketMessage(action: { type: SocketActionTypes.WS_MESSAGE, value: s
 
 function* OnNewGame(action: INewGameActionType) {
     try {
+        isGameOver = false;
         yield put(SendMessageToSocketAction(`new ${action.payload.level}`));
         yield put(SendMessageToSocketAction(`map`));
     } catch (e) {
@@ -58,6 +82,7 @@ function* OnOpenCell(action: IOpenCellActionType) {
     try {
         yield put(SendMessageToSocketAction(`open ${action.payload.x} ${action.payload.y}`));
         yield put(SendMessageToSocketAction(`map`));
+
     } catch (e) {
         console.log(e);
     }

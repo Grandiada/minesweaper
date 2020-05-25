@@ -1,6 +1,7 @@
 interface IPoint {
     x: number;
     y: number;
+    chance: number;
 }
 
 interface IGroups {
@@ -24,7 +25,7 @@ export const constructGroupds = (field: (number | null)[][]): IGroups => {
 
     for (let i = 0; i < field.length; i++)
         for (let j = 0; j < field[i].length; j++) {
-            const point = { x: j, y: i };
+            const point = { x: j, y: i, chance: 0 };
             const mines = field[i][j];
             if (mines === null || mines === 0)
                 continue;
@@ -93,11 +94,14 @@ export const constructGroupds = (field: (number | null)[][]): IGroups => {
         }
     } while (repeat);
 
+    correctChances(rawGroups);
+
     groups.safePoints = rawGroups.filter((i) => i.mines === 0).reduce((accumulator, currentValue) => {
-        return [...accumulator, ...currentValue.group];
+
+        return [...accumulator, ...currentValue.group.filter((m) => m.chance === 0)];
     }, [])
 
-    groups.riskyPoints = rawGroups.filter((i) => i.mines !== 0 && i.mines !== i.group.length).reduce((accumulator, currentValue) => {
+    groups.riskyPoints = rawGroups.filter((i) => i.mines !== 0 && i.mines < i.group.length).reduce((accumulator, currentValue) => {
         return [...accumulator, ...currentValue.group];
     }, [])
 
@@ -105,7 +109,68 @@ export const constructGroupds = (field: (number | null)[][]): IGroups => {
         return [...accumulator, ...currentValue.group];
     }, [])
 
+    console.log(rawGroups);
     return groups;
+}
+
+const correctChances = (groups: GroupDescription[]) => {
+    const map = new Map<string, number>();
+
+    for (const group of groups) {
+        for (const cell of group.group) {
+            const value = map.get(getString(cell))
+            if (value === undefined) {// если ячейка еще не в мапе
+                map.set(getString(cell), group.mines / group.group.length); // то добавляем ее со значением из группы
+            } else { //если она уже в мапе, то корректируем ее значение по теории вероятности
+                map.set(getString(cell), 1 - (1 - value) * (1 - group.mines / group.group.length));
+            }
+        }
+    }
+    let repeat = true;
+    do {
+        repeat = false;
+        for (const group of groups) {
+
+            const sum = group.group.reduce((accumulator, currentValue) => {
+                const value = map.get(getString(currentValue));
+                if (value || value === 0)
+                    return accumulator + value;
+                else
+                    throw new Error();
+            }, 0)
+
+            const mines = group.mines;
+            if (Math.abs(sum - mines) > 1) {
+                repeat = true;
+
+                const coef = group.mines / sum;
+
+                //correct
+                for (const cell of group.group) {
+                    const value = map.get(getString(cell));
+                    if (value || value === 0)
+                        map.set(getString(cell), value * coef);
+                    else
+                        throw new Error();
+                }
+            }
+
+        }
+
+    } while (repeat);
+
+    for (const group of groups) {
+        for (const cell of group.group) {
+            let value = map.get(getString(cell));
+            if (value || value === 0) {
+                if (value > 0.99) value = 0.99;
+                if (value < 0) value = 0;
+                cell.chance = value;
+            } else
+                throw new Error();
+
+        }
+    }
 }
 
 const formGroup = (field: (number | null)[][], point: IPoint): IPoint[] => {
@@ -114,32 +179,35 @@ const formGroup = (field: (number | null)[][], point: IPoint): IPoint[] => {
 
     //
     if (field[point.y - 1] && field[point.y - 1][point.x + 1] === null)
-        group.push({ x: point.x + 1, y: point.y - 1 });
+        group.push({ x: point.x + 1, y: point.y - 1, chance: 0 });
 
     if (field[point.y] && field[point.y][point.x + 1] === null)
-        group.push({ x: point.x + 1, y: point.y });
+        group.push({ x: point.x + 1, y: point.y, chance: 0 });
 
     if (field[point.y + 1] && field[point.y + 1][point.x + 1] === null)
-        group.push({ x: point.x + 1, y: point.y + 1 });
+        group.push({ x: point.x + 1, y: point.y + 1, chance: 0 });
 
     if (field[point.y - 1] && field[point.y - 1][point.x] === null)
-        group.push({ x: point.x, y: point.y - 1 });
+        group.push({ x: point.x, y: point.y - 1, chance: 0 });
 
     if (field[point.y + 1] && field[point.y + 1][point.x] === null)
-        group.push({ x: point.x, y: point.y + 1 });
+        group.push({ x: point.x, y: point.y + 1, chance: 0 });
 
     if (field[point.y - 1] && field[point.y - 1][point.x - 1] === null)
-        group.push({ x: point.x - 1, y: point.y - 1 });
+        group.push({ x: point.x - 1, y: point.y - 1, chance: 0 });
 
     if (field[point.y] && field[point.y][point.x - 1] === null)
-        group.push({ x: point.x - 1, y: point.y });
+        group.push({ x: point.x - 1, y: point.y, chance: 0 });
 
     if (field[point.y + 1] && field[point.y + 1][point.x - 1] === null)
-        group.push({ x: point.x - 1, y: point.y + 1 });
+        group.push({ x: point.x - 1, y: point.y + 1, chance: 0 });
 
     return group;
 }
 
+const getString = (point: IPoint): string => {
+    return `x:${point.x},y:${point.y}`
+}
 
 const arraysEqual = (a: IPoint[], b: IPoint[]) => {
     if (a === b) return true;
