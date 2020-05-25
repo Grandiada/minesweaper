@@ -266,3 +266,5 @@ __pycache__/
 # Truffle (Smart Contract Tests)
 .node-xmlhttprequest-sync-*
 
+# Test reports
+coverage/

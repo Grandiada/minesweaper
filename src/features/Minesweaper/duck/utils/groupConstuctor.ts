@@ -4,24 +4,24 @@ interface IPoint {
     chance: number;
 }
 
-interface IGroups {
+interface ICategorizedCells {
     safePoints: IPoint[];
     minedPoints: IPoint[];
     riskyPoints: IPoint[];
 }
 
-interface GroupDescription {
+interface IGroupDescription {
     mines: number;
     group: IPoint[];
 }
 
-export const constructGroupds = (field: (number | null)[][]): IGroups => {
-    const groups: IGroups = {
+export const categorizeCells = (field: (number | null)[][]): ICategorizedCells => {
+    const groups: ICategorizedCells = {
         safePoints: [],
         minedPoints: [],
         riskyPoints: [],
     }
-    const rawGroups: GroupDescription[] = [];
+    const rawGroups: IGroupDescription[] = [];
 
     for (let i = 0; i < field.length; i++)
         for (let j = 0; j < field[i].length; j++) {
@@ -31,7 +31,7 @@ export const constructGroupds = (field: (number | null)[][]): IGroups => {
                 continue;
             else
                 rawGroups.push({
-                    mines, group: formGroup(field, point)
+                    mines, group: createGroupFromPoint(field, point)
                 })
         }
 
@@ -50,13 +50,13 @@ export const constructGroupds = (field: (number | null)[][]): IGroups => {
                 const groupJ = rawGroups[j];
 
                 // удаляем одинаковые группы
-                if (arraysEqual(groupI.group, groupJ.group)) {
+                if (equalsGroups(groupI.group, groupJ.group)) {
                     rawGroups.splice(j, 1);
                     break;
                 }
 
-                let parent: GroupDescription; // большая группа
-                let child: GroupDescription; // меньшая группа
+                let parent: IGroupDescription; // большая группа
+                let child: IGroupDescription; // меньшая группа
 
 
                 if (groupI.group.length > groupJ.group.length) { // определяем большую и меньшую группы по кол-ву ячеек
@@ -66,18 +66,18 @@ export const constructGroupds = (field: (number | null)[][]): IGroups => {
                     child = groupI; parent = groupJ;
                 }
 
-                if (parentContainsChild(parent.group, child.group)) {  // если большая содержит меньшую
-                    subtractArray(parent, child);
+                if (groupContains(parent.group, child.group)) {  // если большая содержит меньшую
+                    subtractGroup(parent, child);
                     repeat = true;
-                } else if (overlaps(groupI.group, groupJ.group)) {
+                } else if (groupOverlaps(groupI.group, groupJ.group)) {
                     if (groupI.mines > groupJ.mines) {// определяем большую и меньшую группы по кол-ву мин
                         parent = groupI; child = groupJ;
                     }
                     else {
                         child = groupI; parent = groupJ;
                     }
-                    const overlap = getOverlap(parent.group, child.group);
-                    const newGroup: GroupDescription = {
+                    const overlap = getGroupOverlap(parent.group, child.group);
+                    const newGroup: IGroupDescription = {
                         group: overlap,
                         mines: parent.mines - child.group.length - overlap.length,
                     }
@@ -85,8 +85,8 @@ export const constructGroupds = (field: (number | null)[][]): IGroups => {
                         break;
                     } else {
                         rawGroups.push(newGroup);
-                        subtractArray(parent, newGroup);
-                        subtractArray(child, newGroup);
+                        subtractGroup(parent, newGroup);
+                        subtractGroup(child, newGroup);
                         repeat = true;
                     }
                 }
@@ -94,7 +94,7 @@ export const constructGroupds = (field: (number | null)[][]): IGroups => {
         }
     } while (repeat);
 
-    correctChances(rawGroups);
+    setCellChances(rawGroups);
 
     groups.safePoints = rawGroups.filter((i) => i.mines === 0).reduce((accumulator, currentValue) => {
 
@@ -113,16 +113,16 @@ export const constructGroupds = (field: (number | null)[][]): IGroups => {
     return groups;
 }
 
-const correctChances = (groups: GroupDescription[]) => {
+export const setCellChances = (groups: IGroupDescription[]) => {
     const map = new Map<string, number>();
 
     for (const group of groups) {
         for (const cell of group.group) {
-            const value = map.get(getString(cell))
+            const value = map.get(pointToString(cell))
             if (value === undefined) {// если ячейка еще не в мапе
-                map.set(getString(cell), group.mines / group.group.length); // то добавляем ее со значением из группы
+                map.set(pointToString(cell), group.mines / group.group.length); // то добавляем ее со значением из группы
             } else { //если она уже в мапе, то корректируем ее значение по теории вероятности
-                map.set(getString(cell), 1 - (1 - value) * (1 - group.mines / group.group.length));
+                map.set(pointToString(cell), 1 - (1 - value) * (1 - group.mines / group.group.length));
             }
         }
     }
@@ -132,7 +132,7 @@ const correctChances = (groups: GroupDescription[]) => {
         for (const group of groups) {
 
             const sum = group.group.reduce((accumulator, currentValue) => {
-                const value = map.get(getString(currentValue));
+                const value = map.get(pointToString(currentValue));
                 if (value || value === 0)
                     return accumulator + value;
                 else
@@ -147,9 +147,9 @@ const correctChances = (groups: GroupDescription[]) => {
 
                 //correct
                 for (const cell of group.group) {
-                    const value = map.get(getString(cell));
+                    const value = map.get(pointToString(cell));
                     if (value || value === 0)
-                        map.set(getString(cell), value * coef);
+                        map.set(pointToString(cell), value * coef);
                     else
                         throw new Error();
                 }
@@ -161,7 +161,7 @@ const correctChances = (groups: GroupDescription[]) => {
 
     for (const group of groups) {
         for (const cell of group.group) {
-            let value = map.get(getString(cell));
+            let value = map.get(pointToString(cell));
             if (value || value === 0) {
                 if (value > 0.99) value = 0.99;
                 if (value < 0) value = 0;
@@ -173,7 +173,7 @@ const correctChances = (groups: GroupDescription[]) => {
     }
 }
 
-const formGroup = (field: (number | null)[][], point: IPoint): IPoint[] => {
+export const createGroupFromPoint = (field: (number | null)[][], point: IPoint): IPoint[] => {
     const group: IPoint[] = [];
 
 
@@ -205,11 +205,11 @@ const formGroup = (field: (number | null)[][], point: IPoint): IPoint[] => {
     return group;
 }
 
-const getString = (point: IPoint): string => {
+export const pointToString = (point: IPoint): string => {
     return `x:${point.x},y:${point.y}`
 }
 
-const arraysEqual = (a: IPoint[], b: IPoint[]) => {
+export const equalsGroups = (a: IPoint[], b: IPoint[]) => {
     if (a === b) return true;
     if (a == null || b == null) return false;
     if (a.length !== b.length) return false;
@@ -240,7 +240,7 @@ const arraysEqual = (a: IPoint[], b: IPoint[]) => {
     return true;
 }
 
-const parentContainsChild = (parrentArray: IPoint[], childArray: IPoint[]): boolean => {
+export const groupContains = (parrentArray: IPoint[], childArray: IPoint[]): boolean => {
     for (const child of childArray) {
         if (!!!parrentArray.find((m) => m.x === child.x && m.y === child.y))
             return false;
@@ -249,7 +249,7 @@ const parentContainsChild = (parrentArray: IPoint[], childArray: IPoint[]): bool
     return true;
 }
 
-const overlaps = (firstArray: IPoint[], secondArray: IPoint[]): boolean => {
+export const groupOverlaps = (firstArray: IPoint[], secondArray: IPoint[]): boolean => {
     for (const item of secondArray) {
         if (firstArray.find((m) => m.x === item.x && m.y === item.y))
             return true;
@@ -258,7 +258,7 @@ const overlaps = (firstArray: IPoint[], secondArray: IPoint[]): boolean => {
     return false;
 }
 
-const subtractArray = (first: GroupDescription, second: GroupDescription) => {
+export const subtractGroup = (first: IGroupDescription, second: IGroupDescription) => {
     // tslint:disable-next-line: prefer-for-of
     for (let i = 0; i < second.group.length; i++) {
         const index = first.group.findIndex((m) => { return m.x === second.group[i].x && m.y === second.group[i].y })
@@ -268,7 +268,7 @@ const subtractArray = (first: GroupDescription, second: GroupDescription) => {
     first.mines -= second.mines;
 }
 
-const getOverlap = (parent: IPoint[], child: IPoint[]): IPoint[] => {
+const getGroupOverlap = (parent: IPoint[], child: IPoint[]): IPoint[] => {
     const overlap: IPoint[] = [];
     for (const item of child) {
         const element = parent.find((m) => m.x === item.x && m.y === item.y)

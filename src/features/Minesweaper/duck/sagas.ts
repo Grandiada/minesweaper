@@ -5,7 +5,7 @@ import { SendMessageToSocketAction } from "../../../common/utils/socketMiddlewar
 import { arrayParser } from "./utils/arrayParser";
 import { SetMapAction, NewGameAction, OpenCellAction } from "./actions";
 import { IApplicationState } from "../../../app/store";
-import { constructGroupds } from "./utils/groupConstuctor";
+import { categorizeCells } from "./utils/groupConstuctor";
 
 let isGameOver = false;
 function* OnSocketMessage(action: { type: SocketActionTypes.WS_MESSAGE, value: string }) {
