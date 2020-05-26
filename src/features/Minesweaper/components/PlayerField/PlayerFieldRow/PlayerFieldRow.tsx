@@ -27,6 +27,7 @@ export default class PlayerFieldRow extends React.Component<IPlayerFieldRowProps
                 {this.props.rowDescription.map((item, index) =>
                     <div key={index}>
                         <PlayerFieldCell
+                            size={this.props.rowDescription.length > 99 ? 'small' : 'medium'}
                             openCell={this.props.openCell}
                             cellNumber={index}
                             rowNumber={this.props.rowNumber}

@@ -1,6 +1,6 @@
 import {
     MinesweaperActionTypes,
-    GET_MAP, SET_MAP, NEW_GAME, SET_LEVELS, OPEN_CELL, GET_HELP, SOLVE_GAME
+    GET_MAP, SET_MAP, NEW_GAME, SET_LEVELS, OPEN_CELL, GET_HELP, SOLVE_GAME_START, END_GAME, SOLVE_GAME_END
 } from "./types";
 
 export const GetMapAction =
@@ -43,9 +43,21 @@ export const OpenCellAction =
             payload: { x, y }
         });
 
-export const SolveGameAction =
+export const SolveGameStartAction =
     (): MinesweaperActionTypes =>
         ({
-            type: SOLVE_GAME,
+            type: SOLVE_GAME_START,
+        });
+
+export const SolveGameEndAction =
+    (): MinesweaperActionTypes =>
+        ({
+            type: SOLVE_GAME_END,
+        });
+
+export const EndGameAction =
+    (): MinesweaperActionTypes =>
+        ({
+            type: END_GAME,
         });
 

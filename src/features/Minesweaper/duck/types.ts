@@ -1,8 +1,10 @@
 import { Action } from "redux";
 
 export const NEW_GAME = "@@minesweaper/NEW_GAME";
+export const END_GAME = "@@minesweaper/END_GAME";
 
-export const SOLVE_GAME = "@@minesweaper/SOLVE_GAME";
+export const SOLVE_GAME_START = "@@minesweaper/SOLVE_GAME_START";
+export const SOLVE_GAME_END = "@@minesweaper/SOLVE_GAME_END";
 
 export const GET_HELP = "@@minesweaper/GET_HELP";
 export const SET_LEVELS = "@@minesweaper/SET_LEVELS";
@@ -18,9 +20,16 @@ export interface IMinesweaperState {
 
     gameEnded: boolean;
     isAutoSolveMode: boolean;
+    currentLevel?: number;
 }
 
-export interface ISolveGameActionType extends Action<typeof SOLVE_GAME> {
+export interface IEndGameActionType extends Action<typeof END_GAME> {
+}
+
+export interface ISolveGameStartActionType extends Action<typeof SOLVE_GAME_START> {
+}
+
+export interface ISolveGameEndActionType extends Action<typeof SOLVE_GAME_END> {
 }
 
 export interface ISetLevelsActionType extends Action<typeof SET_LEVELS> {
@@ -56,4 +65,5 @@ export interface IOpenCellActionType extends Action<typeof OPEN_CELL> {
 
 
 export type MinesweaperActionTypes = ISetLevelsActionType | IGetHelpActionType | INewGameActionType |
-    IGetMapActionType | ISetMapActionType | IOpenCellActionType | ISolveGameActionType;
+    IGetMapActionType | ISetMapActionType | IOpenCellActionType | ISolveGameStartActionType | ISolveGameEndActionType |
+    IEndGameActionType;

@@ -1,4 +1,4 @@
-.field-cell-base {
+@mixin field-cell-base {
     color: white;
     text-align: center;
     width: 30px;
@@ -8,6 +8,17 @@
     display: inline-block;
     line-height: 200%;
     border: 1px solid wheat;
+}
+
+.field-cell_small {
+    @include field-cell-base();
+    width: 18px;
+    height: 18px;
+    line-height: 115%;
+}
+
+.field-cell_medium {
+    @include field-cell-base();
 }
 
 .field-cell_active {
@@ -21,6 +32,12 @@
 }
 
 .field-cell_disabled {
-    background-color: rgb(64, 108, 126);
+    background-color: rgba(87, 137, 156, 0.5);
+    cursor: default;
+}
+
+
+.field-cell_zero {
+    background-color: rgb(52, 87, 100);
     cursor: default;
 }

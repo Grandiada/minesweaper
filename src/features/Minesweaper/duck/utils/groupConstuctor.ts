@@ -96,12 +96,14 @@ export const categorizeCells = (field: (number | null)[][]): ICategorizedCells =
         }
     } while (repeat);
 
-    setCellChances(rawGroups);
 
     groups.safePoints = rawGroups.filter((i) => i.mines === 0).reduce((accumulator, currentValue) => {
 
         return [...accumulator, ...currentValue.group.filter((m) => m.chance === 0)];
     }, [])
+
+    if (groups.safePoints.length === 0)
+        setCellChances(rawGroups);
 
     groups.riskyPoints = rawGroups.filter((i) => i.mines !== 0 && i.mines < i.group.length).reduce((accumulator, currentValue) => {
         return [...accumulator, ...currentValue.group];
@@ -115,7 +117,7 @@ export const categorizeCells = (field: (number | null)[][]): ICategorizedCells =
     return groups;
 }
 
-export const setCellChances = (groups: IGroupDescription[]) => {
+const setCellChances = (groups: IGroupDescription[]) => {
     const map = new Map<string, BigNumber>();
 
     for (const group of groups) {
@@ -146,7 +148,7 @@ export const setCellChances = (groups: IGroupDescription[]) => {
             }, new BigNumber(0))
 
             const mines = group.mines;
-            if (sum.minus(mines).abs().isGreaterThan(0.1)) {
+            if (sum.minus(mines).abs().isGreaterThan(0.4)) {
                 repeat = true;
 
                 const coef = new BigNumber(group.mines).dividedBy(sum);
@@ -179,7 +181,7 @@ export const setCellChances = (groups: IGroupDescription[]) => {
     }
 }
 
-export const createGroupFromPoint = (field: (number | null)[][], point: IPoint): IPoint[] => {
+const createGroupFromPoint = (field: (number | null)[][], point: IPoint): IPoint[] => {
     const group: IPoint[] = [];
 
 
@@ -211,11 +213,11 @@ export const createGroupFromPoint = (field: (number | null)[][], point: IPoint):
     return group;
 }
 
-export const pointToString = (point: IPoint): string => {
+const pointToString = (point: IPoint): string => {
     return `x:${point.x},y:${point.y}`
 }
 
-export const equalsGroups = (a: IPoint[], b: IPoint[]) => {
+const equalsGroups = (a: IPoint[], b: IPoint[]) => {
     if (a === b) return true;
     if (a == null || b == null) return false;
     if (a.length !== b.length) return false;
@@ -246,7 +248,7 @@ export const equalsGroups = (a: IPoint[], b: IPoint[]) => {
     return true;
 }
 
-export const groupContains = (parrentArray: IPoint[], childArray: IPoint[]): boolean => {
+const groupContains = (parrentArray: IPoint[], childArray: IPoint[]): boolean => {
     for (const child of childArray) {
         if (!!!parrentArray.find((m) => m.x === child.x && m.y === child.y))
             return false;
@@ -255,7 +257,7 @@ export const groupContains = (parrentArray: IPoint[], childArray: IPoint[]): boo
     return true;
 }
 
-export const groupOverlaps = (firstArray: IPoint[], secondArray: IPoint[]): boolean => {
+const groupOverlaps = (firstArray: IPoint[], secondArray: IPoint[]): boolean => {
     for (const item of secondArray) {
         if (firstArray.find((m) => m.x === item.x && m.y === item.y))
             return true;
@@ -264,7 +266,7 @@ export const groupOverlaps = (firstArray: IPoint[], secondArray: IPoint[]): bool
     return false;
 }
 
-export const subtractGroup = (first: IGroupDescription, second: IGroupDescription) => {
+const subtractGroup = (first: IGroupDescription, second: IGroupDescription) => {
     // tslint:disable-next-line: prefer-for-of
     for (let i = 0; i < second.group.length; i++) {
         const index = first.group.findIndex((m) => { return m.x === second.group[i].x && m.y === second.group[i].y })

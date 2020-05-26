@@ -9,12 +9,15 @@ export interface IPlayerFieldCellProps {
     rowNumber: number;
     cellNumber: number;
     openCell: typeof minesweaperActions.OpenCellAction;
+    size: 'small' | 'medium';
 }
 
 export default class PlayerFieldCell extends React.PureComponent<IPlayerFieldCellProps> {
     public render() {
-        const className = [styles["field-cell-base"], this.props.cellValue !== 0
-            ? styles["field-cell_active"] : styles["field-cell_disabled"]].join(' ');
+        const className = [this.props.size === 'small' ? styles["field-cell_small"] : styles["field-cell_medium"],
+        this.props.cellValue === null
+            ? styles["field-cell_active"] :
+            this.props.cellValue === 0 ? styles["field-cell_zero"] : styles["field-cell_disabled"]].join(' ');
         return (
             <div className={className} onClick={this.props.cellValue !== 0 ?
                 () => this.props.openCell(this.props.cellNumber, this.props.rowNumber) :
